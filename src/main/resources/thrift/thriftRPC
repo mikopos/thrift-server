@@ -1,0 +1,14 @@
+namespace java com.marios.gavriil.thrift
+
+struct LogsDTO {
+	1: i16 code,
+	2: string datetime,
+	3: string message,
+	4: string level
+}
+
+service LogsService {
+	list <LogsDTO> getLogByDateTime(1:string datetime),
+	list <LogsDTO> getLogByLevel(1:string level),
+	void sendLog(1:LogsDTO logsDTO)
+}
