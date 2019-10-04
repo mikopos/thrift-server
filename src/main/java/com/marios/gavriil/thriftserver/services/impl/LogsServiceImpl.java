@@ -17,6 +17,15 @@ public class LogsServiceImpl implements LogsService.Iface {
 
     private Logger logger = LoggerFactory.getLogger(LogsServiceImpl.class);
 
+    @Value("${message.topic.name}")
+    private String topicName;
+
+    private final KafkaTemplate<String, LogsDTO> kafkaTemplate;
+
+    public LogsServiceImpl(KafkaTemplate<String, LogsDTO> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
     @Override
     public List<LogsDTO> getLogByDateTime(String datetime) throws TException {
         return null;
@@ -30,5 +39,9 @@ public class LogsServiceImpl implements LogsService.Iface {
     @Override
     public void sendLog(LogsDTO logsDTO) throws TException {
         logger.info(logsDTO.toString());
+        kafkaTemplate.send(topicName,logsDTO);
     }
+
+
+
 }
