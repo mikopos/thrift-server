@@ -8,7 +8,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import java.util.List;
 
@@ -38,8 +41,19 @@ public class LogsServiceImpl implements LogsService.Iface {
 
     @Override
     public void sendLog(LogsDTO logsDTO) throws TException {
-        logger.info(logsDTO.toString());
-        kafkaTemplate.send(topicName,logsDTO);
+        ListenableFuture<SendResult<String, LogsDTO>> future = kafkaTemplate.send(topicName,logsDTO);
+
+        future.addCallback(new ListenableFutureCallback<SendResult<String, LogsDTO>>() {
+
+            @Override
+            public void onSuccess(SendResult<String, LogsDTO> result) {
+                logger.info("Message = ["+logsDTO.toString()+"] was send successfully to Apache Kafka.");
+            }
+            @Override
+            public void onFailure(Throwable ex) {
+                logger.error("Message = ["+logsDTO.toString()+"] failed to be sent to Apache Kafka.");
+            }
+        });
     }
 
 
